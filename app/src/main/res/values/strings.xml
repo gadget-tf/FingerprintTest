@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">FingerprintTest</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="authenticate_1">TEST1 : authenticate(null, mCancelSignal, 0, mAuthenticationCallback, null)</string>
+    <string name="authenticate_2">TEST2 : authenticate(null, null, 0, mAuthenticationCallback, null)</string>
+    <string name="authenticate_3">TEST3 : authenticate(null, mCancelSignal, 0, mAuthenticationCallback, new Handler(looper))</string>
+    <string name="authenticate_4">TEST4 : authenticate(mCryptoObject, mCancelSignal, 0, mAuthenticationCallback, null)</string>
+    <string name="authenticate_5">TEST5 : authenticate(mCryptoObject, mCancelSignal, 0, null, null)</string>
+</resources>
