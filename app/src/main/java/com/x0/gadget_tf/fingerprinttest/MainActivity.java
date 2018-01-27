@@ -1,5 +1,6 @@
 package com.x0.gadget_tf.fingerprinttest;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -59,8 +60,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSelectedMenu(int id) {
         if (id == R.id.button1) {
-            getSupportFragmentManager().beginTransaction().
-                    replace(R.id.mainContainer, new AuthenticateTestFragment()).addToBackStack(null).commit();
+            startActivity(new Intent(this, TestActivity.class));
+            //getSupportFragmentManager().beginTransaction().
+            //        replace(R.id.mainContainer, new AuthenticateTestFragment()).addToBackStack(null).commit();
         }
     }
 }

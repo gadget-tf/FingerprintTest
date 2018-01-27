@@ -10,4 +10,5 @@
     <string name="authenticate_3">TEST3 : authenticate(null, mCancelSignal, 0, mAuthenticationCallback, new Handler(looper))</string>
     <string name="authenticate_4">TEST4 : authenticate(mCryptoObject, mCancelSignal, 0, mAuthenticationCallback, null)</string>
     <string name="authenticate_5">TEST5 : authenticate(mCryptoObject, mCancelSignal, 0, null, null)</string>
+    <string name="title_activity_test">TestActivity</string>
 </resources>
