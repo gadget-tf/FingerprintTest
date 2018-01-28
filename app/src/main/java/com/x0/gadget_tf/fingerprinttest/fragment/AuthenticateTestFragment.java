@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.x0.gadget_tf.fingerprinttest.ConfirmDialog;
+import com.x0.gadget_tf.fingerprinttest.MyApplication;
 import com.x0.gadget_tf.fingerprinttest.R;
 
 import java.io.IOException;
@@ -124,7 +125,7 @@ public class AuthenticateTestFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        mFingerprintManager = (FingerprintManager)getActivity().getSystemService(Context.FINGERPRINT_SERVICE);
+        mFingerprintManager = MyApplication.getFingerprintManager();//(FingerprintManager)getActivity().getSystemService(Context.FINGERPRINT_SERVICE);
 
         generateKey();
         if (cipherInit()) {
@@ -148,6 +149,7 @@ public class AuthenticateTestFragment extends Fragment {
                 }
             }
         } else if (requestCode == ConfirmDialog.REQUEST_CONFIRM) {
+            
             if (mSelectedNumber == 0) {
                 mFingerprintManager.authenticate(null, mCancelSignal, 0, mAuthenticationCallback, null);
                 mDialog =
