@@ -10,9 +10,6 @@ import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 
-/**
- * Created by fujiitakaharu on 2018/01/26.
- */
 
 public class ConfirmDialog extends DialogFragment {
     private static final String ARG_MSG = "msg";
@@ -21,6 +18,7 @@ public class ConfirmDialog extends DialogFragment {
     public static final int REQUEST_OKCANCEL = 1;
     public static final int REQUEST_CONFIRM = 2;
     public static final int REQUEST_TIMER = 3;
+    public static final int REQUEST_OK = 4;
 
     public static ConfirmDialog newInstance(Fragment target, int requestCode, String message) {
         ConfirmDialog dialog = new ConfirmDialog();
@@ -76,6 +74,13 @@ public class ConfirmDialog extends DialogFragment {
                     targetFragment.onActivityResult(requestCode, Activity.RESULT_OK, intent);
                 }
             }, 1000);
+        } else if (requestCode == REQUEST_OK) {
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    targetFragment.onActivityResult(requestCode, Activity.RESULT_OK, null);
+                }
+            });
         }
 
         return builder.create();

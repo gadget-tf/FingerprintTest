@@ -22,6 +22,8 @@ import android.widget.Toast;
 import com.x0.gadget_tf.fingerprinttest.ConfirmDialog;
 import com.x0.gadget_tf.fingerprinttest.MyApplication;
 import com.x0.gadget_tf.fingerprinttest.R;
+import com.x0.gadget_tf.fingerprinttest.state.TestState;
+import com.x0.gadget_tf.fingerprinttest.state.authenticate.AuthenticateState;
 
 import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
@@ -46,7 +48,7 @@ import javax.crypto.SecretKey;
  * Use the {@link AuthenticateTestFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AuthenticateTestFragment extends Fragment {
+public class AuthenticateTestFragment extends Fragment implements TestState.OnCallbackListener {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -93,6 +95,8 @@ public class AuthenticateTestFragment extends Fragment {
     private Cipher mCipher;
     private FingerprintManager.CryptoObject mCryptoObject;
 
+    private TestState mTestState;
+
     private OnFragmentInteractionListener mListener;
 
     public AuthenticateTestFragment() {
@@ -136,71 +140,25 @@ public class AuthenticateTestFragment extends Fragment {
         mDialog =
                 ConfirmDialog.newInstance(this, ConfirmDialog.REQUEST_OKCANCEL, "テストを開始します。");
         mDialog.show(getFragmentManager(), "dialog");
+
+        mTestState = new AuthenticateState(getActivity());
+        mTestState.setCallbackListener(this);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ConfirmDialog.REQUEST_OKCANCEL) {
             if (resultCode == Activity.RESULT_OK) {
-                onActivityResult(ConfirmDialog.REQUEST_CONFIRM, Activity.RESULT_OK, null);
+                onComplete(TestState.NONE);
             } else if (resultCode == Activity.RESULT_CANCELED) {
                 if (mListener != null) {
                     mListener.onFragmentInteraction();
                 }
             }
-        } else if (requestCode == ConfirmDialog.REQUEST_CONFIRM) {
-            
-            if (mSelectedNumber == 0) {
-                mFingerprintManager.authenticate(null, mCancelSignal, 0, mAuthenticationCallback, null);
-                mDialog =
-                        ConfirmDialog.newInstance(this, ConfirmDialog.REQUEST_CONFIRM, getString(R.string.authenticate_1));
-                mDialog.show(getFragmentManager(), "dialog");
-            } else if (mSelectedNumber == 1) {
-                mFingerprintManager.authenticate(null, null, 0, mAuthenticationCallback, null);
-                mDialog =
-                        ConfirmDialog.newInstance(this, ConfirmDialog.REQUEST_CONFIRM, getString(R.string.authenticate_2));
-                mDialog.show(getFragmentManager(), "dialog");
-            } else if (mSelectedNumber == 2) {
-                Looper looper = Looper.getMainLooper();
-                looper.setMessageLogging(new Printer() {
-                    @Override
-                    public void println(final String s) {
-                    }
-                });
-                mFingerprintManager.authenticate(null, mCancelSignal, 0, mAuthenticationCallback, new Handler(looper));
-                mDialog =
-                        ConfirmDialog.newInstance(this, ConfirmDialog.REQUEST_CONFIRM, getString(R.string.authenticate_3));
-                mDialog.show(getFragmentManager(), "dialog");
-            } else if (mSelectedNumber == 3) {
-                mFingerprintManager.authenticate(mCryptoObject, mCancelSignal, 0, mAuthenticationCallback, null);
-                mDialog =
-                        ConfirmDialog.newInstance(this, ConfirmDialog.REQUEST_CONFIRM, getString(R.string.authenticate_4));
-                mDialog.show(getFragmentManager(), "dialog");
-            } else if (mSelectedNumber == 4) {
-                int flag = -1;
-                try {
-                    mFingerprintManager.authenticate(mCryptoObject, mCancelSignal, 0, null, null);
-                    flag = 0;
-                } catch (IllegalArgumentException e) {
-                    flag = 1;
-                } catch (Exception e) {
-                    flag = 2;
-                }
-                mDialog =
-                        ConfirmDialog.newInstance(this, ConfirmDialog.REQUEST_TIMER, getString(R.string.authenticate_5), flag);
-                mDialog.show(getFragmentManager(), "dialog");
+        } else if (requestCode == ConfirmDialog.REQUEST_OK) {
+            if (mListener != null) {
+                mListener.onFragmentInteraction();
             }
-        } else if (requestCode == ConfirmDialog.REQUEST_TIMER) {
-            mDialog.dismiss();
-            int flag = data.getIntExtra("flag", -1);
-            if (flag == 1) {
-                mDialog =
-                        ConfirmDialog.newInstance(this, ConfirmDialog.REQUEST_CONFIRM, "試験終了");
-                mDialog.show(getFragmentManager(), "dialog");
-            }
-            //if (mListener != null) {
-            //    mListener.onFragmentInteraction();
-            //}
         }
     }
 
@@ -276,6 +234,21 @@ public class AuthenticateTestFragment extends Fragment {
                 UnrecoverableKeyException | InvalidKeyException e) {
             throw new RuntimeException("Failed to init Cipher", e);
         }
+    }
+
+    @Override
+    public void onComplete(int result) {
+        mDialog.dismiss();
+        if (result == TestState.COMP) {
+            mDialog =
+                    ConfirmDialog.newInstance(this, ConfirmDialog.REQUEST_OK, "試験終了");
+            mDialog.show(getFragmentManager(), "dialog");
+            return;
+        }
+        mTestState.start();
+        mDialog =
+                ConfirmDialog.newInstance(this, ConfirmDialog.REQUEST_CONFIRM, mTestState.getMessage());
+        mDialog.show(getFragmentManager(), "dialog");
     }
 
     /**

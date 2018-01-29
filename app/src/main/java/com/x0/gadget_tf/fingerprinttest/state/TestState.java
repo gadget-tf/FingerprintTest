@@ -12,7 +12,8 @@ public interface TestState {
         void onComplete(int result);
     }
 
-    int start(Context context);
+    int start();
     void setCallbackListener(OnCallbackListener listener);
     int getNowState();
+    String getMessage();
 }

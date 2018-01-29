@@ -13,6 +13,7 @@ import android.util.Printer;
 
 import com.x0.gadget_tf.fingerprinttest.ConfirmDialog;
 import com.x0.gadget_tf.fingerprinttest.MyApplication;
+import com.x0.gadget_tf.fingerprinttest.R;
 import com.x0.gadget_tf.fingerprinttest.state.TestState;
 
 import java.io.IOException;
@@ -53,6 +54,7 @@ public class AuthenticateState implements TestState {
         @Override
         public void onAuthenticationSucceeded(FingerprintManager.AuthenticationResult result) {
             super.onAuthenticationSucceeded(result);
+            mNowState++;
             if (mListener != null) {
                 mListener.onComplete(TestState.SUCCESS);
             }
@@ -61,6 +63,7 @@ public class AuthenticateState implements TestState {
         @Override
         public void onAuthenticationFailed() {
             super.onAuthenticationFailed();
+            mNowState++;
             if (mListener != null) {
                 mListener.onComplete(TestState.SUCCESS);
             }
@@ -68,9 +71,17 @@ public class AuthenticateState implements TestState {
     };
     private CancellationSignal mCancelSignal;
     private TestState.OnCallbackListener mListener;
+    private Context mContext;
+    private Handler mHandler;
+    private int mFlag;
+
+    public AuthenticateState(Context context) {
+        mContext = context;
+        mHandler = new Handler(mContext.getMainLooper());
+    }
 
     @Override
-    public int start(Context context) {
+    public int start() {
         FingerprintManager fingerprintManager = MyApplication.getFingerprintManager();
         if (mNowState == 0) {
             fingerprintManager.authenticate(null, mCancelSignal, 0, mAuthenticationCallback, null);
@@ -87,21 +98,34 @@ public class AuthenticateState implements TestState {
         } else if (mNowState == 3) {
             fingerprintManager.authenticate(mCryptoObject, mCancelSignal, 0, mAuthenticationCallback, null);
         } else if (mNowState == 4) {
-            int flag = TestState.NONE;
+            mFlag = TestState.NONE;
             try {
                 fingerprintManager.authenticate(mCryptoObject, mCancelSignal, 0, null, null);
-                flag = TestState.FAIL;
+                mFlag = TestState.FAIL;
             } catch (IllegalArgumentException e) {
-                flag = TestState.SUCCESS;
+                mFlag = TestState.SUCCESS;
             } catch (Exception e) {
-                flag = TestState.FAIL;
+                mFlag = TestState.FAIL;
             }
             if (mListener != null) {
-                mListener.onComplete(flag);
+                mNowState++;
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mListener.onComplete(mFlag);
+                    }
+                }, 100);
+
             }
         } else if (mNowState == 5) {
             if (mListener != null) {
-                mListener.onComplete(TestState.COMP);
+                mNowState++;
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mListener.onComplete(TestState.COMP);
+                    }
+                }, 100);
             }
         }
 
@@ -116,6 +140,24 @@ public class AuthenticateState implements TestState {
     @Override
     public int getNowState() {
         return mNowState;
+    }
+
+    @Override
+    public String getMessage() {
+        String msg = "";
+        if (mNowState == 0) {
+            msg = mContext.getString(R.string.authenticate_1);
+        } else if (mNowState == 1) {
+            msg = mContext.getString(R.string.authenticate_2);
+        } else if (mNowState == 2) {
+            msg = mContext.getString(R.string.authenticate_3);
+        } else if (mNowState == 3) {
+            msg = mContext.getString(R.string.authenticate_4);
+        } else if (mNowState == 4) {
+            msg = mContext.getString(R.string.authenticate_5);
+        }
+
+        return msg;
     }
 
     private void generateKey() {
